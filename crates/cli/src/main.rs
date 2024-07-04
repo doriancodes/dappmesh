@@ -3,13 +3,14 @@ mod commands;
 mod env;
 mod validation;
 
+use std::error::Error;
 use crate::cli::{Cli, EnvAction};
-use crate::validation::validate_all2;
+use crate::validation::validate_all;
 use clap::Parser;
 use std::process::Command;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn Error>> {
 	let cli = Cli::parse();
 
 	match &cli.env {
@@ -18,9 +19,11 @@ async fn main() {
 		}
 		EnvAction::Check =>  {
 
-			validate_all2().await
+			validate_all().await?;
+
 		}
 	}
+	Ok(())
 }
 
 #[cfg(test)]

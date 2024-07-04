@@ -1,11 +1,12 @@
 use crate::commands::{CmdCheck, CMD_CHECKS};
-use crate::env::Executable;
+use crate::env::ExecCommand;
 use crate::env::ExecutableError::IOError;
 use std::cmp::PartialEq;
 use std::fmt::Display;
+use std::error::Error;
 use std::process::Output;
 use std::str;
-use tokio::task::JoinSet;
+use tokio::task::{JoinError, JoinSet};
 use colored::Colorize;
 
 pub(crate) type CheckResult = (CmdCheck, ValidationResult);
@@ -47,6 +48,10 @@ impl Validator {
 	}
 }
 
+pub trait Validating {
+	async fn validate(f: dyn Fn() -> ()) -> CheckResult;
+}
+
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub enum ValidationResult {
 	Success,
@@ -58,38 +63,24 @@ pub enum ValidationResult {
 	},
 }
 
-pub async fn validate_fn(cmd_check: CmdCheck, output: Output) -> CheckResult {
-	if !&output.status.success() {
-		(
-			cmd_check,
-			ValidationResult::Failure {
-				msg: str::from_utf8(&output.stderr).unwrap().to_string(),
-			},
-		)
-	} else {
-		(cmd_check, ValidationResult::Success)
-	}
-}
-
-pub async fn validate_all2() {
-	let checks = CMD_CHECKS.clone();
+pub async fn validate_all() -> Result<(), Box<dyn Error>> {
+	let checks = &CMD_CHECKS;
 
 	let mut tasks:JoinSet<CheckResult> = JoinSet::new();
 
-	for (key, value) in checks.iter() {
-		let cmd_check: &CmdCheck = key;
-
+	for (key, _) in checks.iter() {
 		tasks.spawn(
-			perform_check(cmd_check.clone())
+			perform_check(**key)
 		);
 	}
 
 	while let Some(res) = tasks.join_next().await {
-		let (cmd_check, validation_result) = res.unwrap();
+		let (cmd_check, validation_result) = res?;
 		pretty_print(cmd_check, validation_result)
 	}
 
 
+	Ok(())
 }
 
 pub fn pretty_print(cmd_check: CmdCheck, validation_result: ValidationResult){
@@ -118,8 +109,8 @@ pub fn pretty_print(cmd_check: CmdCheck, validation_result: ValidationResult){
 
 pub async fn perform_check(cmd_check: CmdCheck) -> CheckResult {
 
-	let cmd = CMD_CHECKS.get(&cmd_check).unwrap().to_string();
-	let res = Executable::lazy_build(&cmd).await.exec().await.map_err(IOError).unwrap();
+	let cmd = *CMD_CHECKS.get(&cmd_check).unwrap();
+	let res = ExecCommand::from(cmd).exec().await.map_err(|e|{format!("{}", e)}).unwrap();
 	let (check, result) = Validator::new(cmd_check, res).await.validate().await;
 
 
@@ -128,6 +119,8 @@ pub async fn perform_check(cmd_check: CmdCheck) -> CheckResult {
 
 #[cfg(test)]
 mod tests {
+	//idea
+	//https://rust-lang.github.io/api-guidelines/interoperability.html#generic-readerwriter-functions-take-r-read-and-w-write-by-value-c-rw-value
 	use crate::commands::CmdCheck;
 	use crate::validation::{ValidationResult, Validator};
 	use std::os::unix::process::ExitStatusExt;

@@ -34,7 +34,7 @@ const MAKE_INTEGRATION_TEST_CMD: &'static str = "make integration-test";
 lazy_static! {
 	pub static ref CMD_CHECKS: HashMap<&'static CmdCheck, &'static str> = hashmap! {
 		&CmdCheck::AccessToGHRC => ACCESS_TO_GHRC_CMD,
-	//	&CmdCheck::Workspace => MAKE_CHECK_CMD,
+		&CmdCheck::Workspace => MAKE_CHECK_CMD,
 		&CmdCheck::Quick => MAKE_QUICK_CMD,
 		&CmdCheck::UnitTests => MAKE_TEST_CMD,
 	//	&CmdCheck::IntegrationTests => MAKE_INTEGRATION_TEST_CMD,
