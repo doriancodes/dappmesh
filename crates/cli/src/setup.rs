@@ -2,10 +2,8 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
-use std::process::Command;
-use crate::commands::{CargoOp, CmdOp, CARGO_OPS, CMD_OPS, Exec};
-use crate::shell_env::ExecCommand;
-use crate::validation::{perform_check, pretty_print, ValidationResult, Validator};
+use crate::commands::{CmdOp,CMD_OPS, Exec};
+use crate::validation::{perform_check};
 use anyhow::Result;
 use cargo_run_bin::{binary, metadata};
 use tokio::task::JoinSet;
@@ -25,17 +23,10 @@ pub async fn install_all() -> std::result::Result<(), Box<dyn Error>> {
 
 }
 
-pub async fn func1() {
-	let status = Command::new("docker").arg("--help").status().unwrap();
-
-	println!("{}", status.code().unwrap())
-
-
-}
 
 async fn gen_tasks(op_map: &HashMap<&CmdOp, Exec>)
 {
-	let mut tasks: JoinSet<()> = JoinSet::new();
+	let mut tasks: JoinSet<String> = JoinSet::new();
 
 	for (key, _) in op_map.iter() {
 		let (check, _) = *op_map.get(key).unwrap();
@@ -44,7 +35,8 @@ async fn gen_tasks(op_map: &HashMap<&CmdOp, Exec>)
 	}
 
 	while let Some(res) = tasks.join_next().await {
-		continue
+		let result = res.map_err(|e| format!("{}", e)).unwrap();
+		println!("{}", result)
 	}
 }
 pub async fn cargo_binaries() -> Result<()> {

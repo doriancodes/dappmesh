@@ -4,7 +4,7 @@ rustflags = [
 ]
 
 [alias]
-vet = ["bin", "cargo-vet"]
-make = ["bin", "cargo-make"]
-deny = ["bin", "cargo-deny"]
 acl = ["bin", "cargo-acl"]
+deny = ["bin", "cargo-deny"]
+make = ["bin", "cargo-make"]
+vet = ["bin", "cargo-vet"]

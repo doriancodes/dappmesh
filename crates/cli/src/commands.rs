@@ -16,7 +16,9 @@ pub enum CmdOp {
 	CargoMakeInstalled,
 	CargoVetInstalled,
 	CargoACLInstalled,
-CargoDenyInstalled
+	CargoDenyInstalled,
+	CargoBinstall,
+	CargoRunBin
 }
 
 #[derive(Eq, PartialEq, Hash, Debug, Copy, Clone, EnumString, strum_macros::Display)]
@@ -41,20 +43,20 @@ pub(crate) type Suggestion = &'static str;
 pub(crate) type Exec = (Check, Suggestion);
 
 lazy_static! {
-	//cargo install --list | awk '/^\\w/ {print $1}'
-	//TODO add cargo binstall and cargo-run-bin
 	pub static ref CMD_OPS: HashMap<&'static CmdOp, Exec> = hashmap! {
 		&CmdOp::BubblewrapInstalled => ("apt list | grep bubblewrap","sudo apt install -y bubblewrap"), //probably not needed
-		//&CmdOp::AccessToGHRC => (ACCESS_TO_GHRC_CMD, "make sure to export your token: 'export GHRC_TOKEN=YOUR_TOKEN'"),
+		&CmdOp::AccessToGHRC => (ACCESS_TO_GHRC_CMD, "make sure to export your token: 'export GHRC_TOKEN=YOUR_TOKEN'"),
 		&CmdOp::DockerInstalled => ("docker --help", "install docker"),
 		&CmdOp::BuildxInstalled => ("docker buildx --help", "install buildx"),
-		&CmdOp::DockerRunning => ("docker ps", "start docker"),//TODO change
+		//&CmdOp::DockerRunning => ("docker ps", "start docker"),//TODO change
 		&CmdOp::KubectlInstalled => ("kubectl --help", "install kubernetes"),
 		&CmdOp::KubernetesRunning => ("kubectl get nodes", "start kubernetes"),
-		&CmdOp::CargoMakeInstalled => ("find \"$PWD/.bin\" -name \"cargo-make\"", "run 'dappctl install --cargo'"),
-		&CmdOp::CargoVetInstalled => ("find \"$PWD/.bin\" -name \"cargo-vet\"", "run 'dappctl install --cargo'"),
-		&CmdOp::CargoACLInstalled => ("find \"$PWD/.bin\" -name \"cargo-acl\"","run 'dappctl install --cargo'"),
-		&CmdOp::CargoDenyInstalled => ("find \"$PWD/.bin\" -name \"cargo-deny\"", "run 'dappctl install --cargo'"),
+		&CmdOp::CargoMakeInstalled => ("cargo make --help", "run 'cargo bin -i'"),
+		&CmdOp::CargoVetInstalled => ("cargo vet --help", "run 'cargo bin -i'"),
+		&CmdOp::CargoACLInstalled => ("cargo acl --help","run 'cargo bin -i''"),
+		&CmdOp::CargoDenyInstalled => ("cargo acl --help", "run 'cargo bin -i'"),
+		&CmdOp::CargoBinstall => ("cargo binstall --help", "run 'cargo install cargo-binstall'"),
+		&CmdOp::CargoRunBin => ("cargo bin --help", "run 'cargo install cargo-run-bin'"),
 
 	};
 

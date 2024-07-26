@@ -42,23 +42,8 @@ impl From<&str> for ExecCommand {
 	}
 }
 
-/*fn exec_multi_plat() -> &'static mut Command {
-	if cfg!(target_os = "windows") {
-		Command::new("cmd").arg("/C")
-	} else {
-		Command::new("sh").arg("-c")
-	}
-}*/
 
 impl ExecCommand {
-
-	pub fn get_cmd(&self) -> &Command {
-		&self.command
-	}
-
-	pub fn get_cmd_as_mut(&mut self) -> &mut Command {
-		&mut self.command
-	}
 
 	pub fn new<S: AsRef<OsStr>>(program: S) -> Self {
 		let mut cmd = Command::new("sh");
@@ -76,15 +61,6 @@ impl ExecCommand {
 	}
 
 	pub async fn exec(&mut self) -> Result<DappOutput, Error> {
-		match self.command.output() {
-			Ok(out) => Ok(DappOutput {
-				inner: out,
-			}),
-			Err(err) => Err(err),
-		}
-	}
-
-	pub async fn exec_2(&mut self) -> Result<DappOutput, Error> {
 		match self.command.output() {
 			Ok(out) => Ok(DappOutput {
 				inner: out,
@@ -116,7 +92,6 @@ impl ShellEnv for WindowsShell {
 		ExecCommand {
 			command: window_cmd
 		}
-		//window_cmd
 
 	}
 }

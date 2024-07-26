@@ -12,7 +12,7 @@ use std::str;
 pub async fn validate_all() -> Result<(), Box<dyn Error>> {
     let cmd_ops = &CMD_OPS;
 
-    let mut final_tasks: JoinSet<()> = JoinSet::new();
+    let mut final_tasks: JoinSet<String> = JoinSet::new();
 
 
     for (key, _) in cmd_ops.iter() {
@@ -23,60 +23,48 @@ pub async fn validate_all() -> Result<(), Box<dyn Error>> {
     }
 
     while let Some(res) = final_tasks.join_next().await {
-        continue
+        let result = res.map_err(|e| format!("{}", e)).unwrap();
+        println!("{}", result)
     }
 
     Ok(())
 }
 
-pub async fn perform_check(cmd_check: CmdOp) {
+pub async fn perform_check(cmd_check: CmdOp) -> String {
 
     let mut cmd = &mut EnvironmentContext::new().command;
 
-    let cmd_str = CMD_OPS.get(&cmd_check).unwrap().0.to_string();
-        cmd.arg(cmd_str);
+    let (cmd_arg, _) = CMD_OPS[&cmd_check];
+    cmd.arg(cmd_arg);
 
     let res = cmd.exec().await.map_err(|e| format!("{}", e)).unwrap();
-    let (check, result) = Validator::new(cmd_check, res.inner.clone()).await.validate().await;
+    let (_, result) = Validator::new(cmd_check, res.inner.clone()).await.validate().await;
 
-    let (check, _) = *CMD_OPS.get(&cmd_check).unwrap();
-
-    pretty_print(cmd_check, result, check)
+    format_out(cmd_check, result, cmd_arg)
 
 }
 
-pub fn pretty_print<C>(cmd_check: C, validation_result: ValidationResult, check: &'static str)
+pub fn format_out<C>(cmd_check: C, validation_result: ValidationResult, check: &'static str) -> String
     where
         C: Eq + PartialEq + Hash + Debug + Copy + Clone + Display + Send + Sync + 'static,
 {
     let fmt_check = format!("{}", cmd_check);
+    let line_separator = "___________________________________________________________________________";
     match validation_result {
         ValidationResult::Success => {
-            println!("{} {}", "Validation for", fmt_check.bold());
-            println!("{}: {}", "Successful validations for".green(), fmt_check.bold().green());
-            println!(
-                "{}",
-                "___________________________________________________________________________"
-            );
+            format!("Validation for {}\n{}: {}\n{}\n", fmt_check.bold(), "Successful validation for".green(),  fmt_check.bold().green(), &line_separator)
         }
         ValidationResult::Failure {
-            ..
+            msg
         } => {
-            println!("{} {}", "Validation for", fmt_check.bold());
-            println!("{} {}", "An error occurred, for more info run:".red(), check.blue().italic());
-            println!("___________________________________________________________________________");
+            format!("Validation for {}\n{}\n{}: {}\n{}\n", fmt_check.bold(), &msg.red(),"For more info run:",  check.blue().italic(), &line_separator)
         }
         ValidationResult::Warning {
-            ..
+            msg
         } => {
-            println!("{} {}", "Validation for", fmt_check.bold());
-            println!(
-                "{} {}",
-                "A warning occurred, for more info run:".yellow(),
-                check.blue().italic()
-            );
-            println!("___________________________________________________________________________");
+            format!("Validation for {}\n{}\n{}: {}\n{}\n", fmt_check.bold(), &msg.yellow(),"For more info run:",  check.blue().italic(), &line_separator)
         }
+
     }
 }
 

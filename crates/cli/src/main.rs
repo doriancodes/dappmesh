@@ -5,7 +5,7 @@ mod setup;
 mod validation;
 
 use crate::cli::{Cli, DevenvAction};
-use crate::setup::{cargo_binaries, func1};
+use crate::setup::cargo_binaries;
 use clap::Parser;
 use std::error::Error;
 use crate::validation::validate_all;
@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 	match &cli.env {
 		DevenvAction::Install => {
 			//install().await;
-			func1().await;
+			cargo_binaries().await?;
 		}
 		DevenvAction::Check => {
 
