@@ -53,24 +53,32 @@ NOTE: You might want to check some concepts discussed in this AWS article about 
 - [MacOS](docs/setup/macos.md)
 - [Windows](docs/setup/windows.md)
 
-### Cargo Plugins
-
-Install cargo-make:
+### Setup local environment for Cargo Plugins
+nix-build shell.nix -A inputDerivation -> nix cache, check if cachix is free
+os in nix shell https://fzakaria.com/2024/07/05/learn-nix-the-fun-way.html
+https://gvolpe.com/blog/github-actions-nix-cachix-dhall/
+https://nix.dev/tutorials/nixos/continuous-integration-github-actions
+https://docs.cachix.org/pushing
+https://app.cachix.org/cache
+https://devenv.sh/automatic-shell-activation/
+Run:
 ```shell
-cargo install --no-default-features --force --locked cargo-make
+cargo install cargo-run-bin
+cargo bin -i 
 ```
+The Cargo Plugins are automatically downloaded and installed in the `.bin` directory.
+
+### Speed up installing cargo dependencies (optional, but highly recommended)
+To speed up installing cargo install `bininstall`:
+```shell
+cargo install cargo-bininstall
+```
+`cargo-run-bin` will automatically use `cargo bininstall` if present. `bininstall` installs directly pre-built binaries.
+
+### Install bubblewrap
 
 Using the dependency checking tools locally requires installing the following software:
 ```shell
-# ensure all dependencies conform to expectations and requirements
-cargo install --locked cargo-deny
-
-# ensure that third-party Rust dependencies have been audited by a trusted entity
-cargo install --locked cargo-vet
-
-# code ACL checker
-cargo install --locked cargo-acl
-
 # Linux: bubblewrap allows build scripts (build.rs), tests and rustc to be run inside a sandbox
 sudo apt install -y bubblewrap # Adapt as required
 ```

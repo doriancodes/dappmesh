@@ -1,5 +1,5 @@
 [package]
-name = "dapp-cli"
+name = "dappctl"
 version.workspace = true
 rust-version.workspace = true
 edition.workspace = true
@@ -28,6 +28,11 @@ tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 strum_macros = "0.26.4"
+tokio-util = "0.7.11"
+cargo-run-bin = "1.7.3"
+anyhow.workspace = true
+bollard = "0.16.1"
+crossterm = "0.27.0"
 
 [dev-dependencies]
 anyhow = { workspace = true }

@@ -4,12 +4,12 @@ use clap::{Parser, Subcommand, ValueEnum};
 #[command(version, about)]
 pub struct Cli {
 	#[arg(value_enum)]
-	pub env: EnvAction,
+	pub env: DevenvAction,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-pub enum EnvAction {
-	Setup,
+pub enum DevenvAction {
+	Install,
 	Check,
 }
 

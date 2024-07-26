@@ -1,26 +1,27 @@
 mod cli;
 mod commands;
-mod env;
+mod shell_env;
+mod setup;
 mod validation;
 
-use std::error::Error;
-use crate::cli::{Cli, EnvAction};
-use crate::validation::validate_all;
+use crate::cli::{Cli, DevenvAction};
+use crate::setup::{cargo_binaries, func1};
 use clap::Parser;
-use std::process::Command;
+use std::error::Error;
+use crate::validation::validate_all;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
 	let cli = Cli::parse();
 
 	match &cli.env {
-		EnvAction::Setup => {
-			println!("setup");
+		DevenvAction::Install => {
+			//install().await;
+			func1().await;
 		}
-		EnvAction::Check =>  {
+		DevenvAction::Check => {
 
 			validate_all().await?;
-
 		}
 	}
 	Ok(())
@@ -28,13 +29,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 #[cfg(test)]
 mod tests {
-	use super::*;
 	use assert_cmd::prelude::*;
 	use predicates::prelude::predicate;
+	use std::process::Command;
 
 	#[test]
 	fn test() -> Result<(), Box<dyn std::error::Error>> {
-		let mut cmd = Command::cargo_bin("dapp-cli")?;
+		let mut cmd = Command::cargo_bin("dappctl")?;
 
 		cmd.arg("check");
 

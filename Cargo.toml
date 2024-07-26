@@ -40,6 +40,7 @@ tower-test = "0.4.0"
 tracing = "0.1.40"
 tracing-subscriber = {version = "0.3.18", features = ["json", "env-filter"]}
 uuid = { version = "1.7.0", features = ["v4"] }
+cargo-run-bin = { version = "1.7.2", default-features = false }
 
 [profile.release]
 lto = true
@@ -50,3 +51,14 @@ codegen-units = 1
 
 [profile.bench]
 strip = false
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
+
+[workspace.metadata.bin]
+cargo-vet = { version = "0.9.1", locked = true }
+cargo-deny = { version = "0.14.24", locked = true }
+cargo-acl = { version = "0.8.0", locked = true}
+cargo-make = { version = "0.37.13", locked = true }

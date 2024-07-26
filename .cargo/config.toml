@@ -2,3 +2,9 @@
 rustflags = [
 	"-C", "target-feature=+crt-static"
 ]
+
+[alias]
+vet = ["bin", "cargo-vet"]
+make = ["bin", "cargo-make"]
+deny = ["bin", "cargo-deny"]
+acl = ["bin", "cargo-acl"]
